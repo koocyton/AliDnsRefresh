@@ -1,0 +1,24 @@
+# phpstorm project files
+.idea
+.gradle
+*.iml
+build
+out
+
+# netbeans project files
+nbproject
+
+# zend studio for eclipse project files
+.buildpath
+.project
+.settings
+
+# windows thumbnail cache
+Thumbs.db
+
+# Mac cache
+dump.rdb
+
+# Mac DS_Store Files
+.DS_Store
+

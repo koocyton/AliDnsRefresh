@@ -1,0 +1,42 @@
+group 'com.doopp.gauss.dns'
+version '1.0'
+
+apply plugin: 'java'
+apply plugin: 'application'
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven { url 'http://repo.spring.io/libs-release' }
+    maven { url "http://repo.springsource.org/repo" }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.aliyun:aliyun-java-sdk-alidns:2.0.1'
+    compile 'com.aliyun:aliyun-java-sdk-core:2.3.8'
+    compile 'com.ning:async-http-client:1.9.38'
+}
+
+jar {
+    manifest {
+        attributes(
+                "Manifest-Version": 1.0,
+                "Main-Class": "com.doopp.gauss.dns.refresh.KTApplication"
+        )
+    }
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+task clearPj(type:Delete){
+    delete 'build','target'
+}
+task release(type: Copy,dependsOn: [clearPj, jar]) {
+}
