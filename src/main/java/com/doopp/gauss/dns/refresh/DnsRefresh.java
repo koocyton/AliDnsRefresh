@@ -63,6 +63,7 @@ public class DnsRefresh implements Runnable {
             DescribeDomainRecordsResponse response = client.getAcsResponse(request);
             List<DescribeDomainRecordsResponse.Record> recordList = response.getDomainRecords();
             for (DescribeDomainRecordsResponse.Record record : recordList) {
+                // 只解析配置里的子域名
                 if (Arrays.asList(domainArray).contains(record.getRR())) {
                     // 取得要解析的 record id
                     recordRRList.put(record.getRecordId(), record.getRR());
@@ -72,14 +73,14 @@ public class DnsRefresh implements Runnable {
             System.out.print(" >>> Error : "+ e.getMessage() + "\n");
         }
 
-        // 新的 IP 先和旧 IP 一样
+        // 预新的 IP 先和旧 IP 一样
         String newIp = oldIp;
 
         // 初始化更新域名解析的类
         UpdateDomainRecordRequest updateRequest = new UpdateDomainRecordRequest();
         updateRequest.setType("A");
 
-        // 每一段时间循环一次
+        // 每 30 秒循环一次
         while (true) {
             String ipHtml = this.httpGet(requestUrl);
             if (ipHtml != null) {
@@ -90,10 +91,13 @@ public class DnsRefresh implements Runnable {
                 }
                 // 如果 IP 发生了变化
                 if (newIp != null && !newIp.equals(oldIp)) {
+                    // 设置新的 IP
                     updateRequest.setValue(newIp);
                     // 将每个要解析的域名都处理一次
                     for (String recordId : recordRRList.keySet()) {
+                        // 域名
                         updateRequest.setRR(recordRRList.get(recordId));
+                        // recordId
                         updateRequest.setRecordId(recordId);
                         try {
                             UpdateDomainRecordResponse updateResponse = client.getAcsResponse(updateRequest);
@@ -102,12 +106,14 @@ public class DnsRefresh implements Runnable {
                             System.out.println("client.getAcsResponse Error : " + e.getMessage() + "\n");
                         }
                     }
+                    // 旧 IP 重新赋值
                     oldIp = newIp;
                 }
 
+                // 线程等待 10 秒
                 synchronized (this) {
                     try {
-                        this.wait(10 * 1000);
+                        this.wait(30 * 1000);
                     } catch (Exception e) {
                         System.out.println("System wait error : " + e.getMessage() + "\n");
                     }
