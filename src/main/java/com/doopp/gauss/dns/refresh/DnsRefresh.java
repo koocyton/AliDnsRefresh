@@ -76,21 +76,20 @@ public class DnsRefresh implements Runnable {
         // 预新的 IP 先和旧 IP 一样
         String newIp = oldIp;
 
-        // 初始化更新域名解析的类
-        UpdateDomainRecordRequest updateRequest = new UpdateDomainRecordRequest();
-        updateRequest.setType("A");
-
         // 每 30 秒循环一次
         while (true) {
+            // 摘取页面
             String ipHtml = this.httpGet(requestUrl);
+            // 抓取成功
             if (ipHtml != null) {
-                Pattern p = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+)");
-                Matcher m = p.matcher(ipHtml);
-                if (m.find()) {
-                    newIp = m.group(1);
-                }
+                // IP 正则取出
+                Matcher m = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+)").matcher(ipHtml);
+                newIp = m.find() ? m.group(1) : newIp;
                 // 如果 IP 发生了变化
                 if (newIp != null && !newIp.equals(oldIp)) {
+                    // 初始化更新域名解析的类
+                    UpdateDomainRecordRequest updateRequest = new UpdateDomainRecordRequest();
+                    updateRequest.setType("A");
                     // 设置新的 IP
                     updateRequest.setValue(newIp);
                     // 将每个要解析的域名都处理一次
@@ -99,6 +98,8 @@ public class DnsRefresh implements Runnable {
                         updateRequest.setRR(recordRRList.get(recordId));
                         // recordId
                         updateRequest.setRecordId(recordId);
+                        // print log
+                        System.out.println("Try Update Domain : " + recordRRList.get(recordId) + "." + rootDomain + "\n");
                         try {
                             UpdateDomainRecordResponse updateResponse = client.getAcsResponse(updateRequest);
                             System.out.println("UpdateDomainRecordResponse : " + updateResponse + "\n");
