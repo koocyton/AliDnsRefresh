@@ -19,7 +19,7 @@ repositories {
 dependencies {
     compile 'com.aliyun:aliyun-java-sdk-alidns:2.0.1'
     compile 'com.aliyun:aliyun-java-sdk-core:2.3.8'
-    compile 'com.ning:async-http-client:1.9.38'
+    // compile 'com.ning:async-http-client:1.9.38'
 }
 
 jar {

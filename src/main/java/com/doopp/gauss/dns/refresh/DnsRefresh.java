@@ -6,15 +6,16 @@ import com.aliyuncs.alidns.model.v20150109.*;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.Response;
+//import com.ning.http.client.AsyncCompletionHandler;
+//import com.ning.http.client.AsyncHttpClient;
+//import com.ning.http.client.Response;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.*;
-import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -122,20 +123,26 @@ public class DnsRefresh {
         }
     }
 
-    private String httpGet(String requestUrl) {
-        AsyncHttpClient client = new AsyncHttpClient();
-        Future<String> f = client.prepareGet(requestUrl).execute(new AsyncCompletionHandler<String>() {
-            @Override
-            public String onCompleted(Response response) throws Exception {
-                return response.getResponseBody();
-            }
-        });
+    private String httpGet(String url) {
+        HttpURLConnection http = null;
+        InputStream is = null;
         try {
-            return f.get();
-        } catch (Exception e) {
-            System.out.println("can not http request " + requestUrl + "\n");
+            URL urlGet = new URL(url);
+            http = (HttpURLConnection) urlGet.openConnection();
+            http.setRequestMethod("GET");
+            http.setRequestProperty("Content-Type", "text/html; charset=UTF-8");
+            http.setDoOutput(true);
+            http.setDoInput(true);
+            http.connect();
+            is = http.getInputStream();
+            int size = is.available();
+            byte[] jsonBytes = new byte[size];
+            is.read(jsonBytes);
+            return new String(jsonBytes, "UTF-8");
         }
-        return null;
+        catch (Exception e) {
+            return null;
+        }
     }
 
 
