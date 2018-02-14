@@ -18,7 +18,7 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DnsRefresh implements Runnable {
+public class DnsRefresh {
 
     private String propertyFile = "";
 
@@ -26,8 +26,7 @@ public class DnsRefresh implements Runnable {
         this.propertyFile = propertyFile;
     }
 
-    @Override
-    public void run() {
+    public void start() {
 
         System.out.print(" >>> " + propertyFile + "\n");
         Properties properties = this.getProperties();
