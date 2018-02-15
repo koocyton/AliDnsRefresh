@@ -74,21 +74,24 @@ public class DnsRefresh {
         }
 
         // 预新的 IP 先和旧 IP 一样
-        String newIp = oldIp;
+        String newIp  = oldIp;
+        String ipHtml;
+        Pattern pattern = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+)");
+        Matcher m;
+        UpdateDomainRecordRequest updateRequest = new UpdateDomainRecordRequest();
 
         // 每 30 秒循环一次
         while (true) {
             // 摘取页面
-            String ipHtml = this.httpGet(requestUrl);
+            ipHtml = this.httpGet(requestUrl);
             // 抓取成功
             if (ipHtml != null) {
                 // IP 正则取出
-                Matcher m = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+)").matcher(ipHtml);
+                m = pattern.matcher(ipHtml);
                 newIp = m.find() ? m.group(1) : newIp;
                 // 如果 IP 发生了变化
                 if (newIp != null && !newIp.equals(oldIp)) {
                     // 初始化更新域名解析的类
-                    UpdateDomainRecordRequest updateRequest = new UpdateDomainRecordRequest();
                     updateRequest.setType("A");
                     // 设置新的 IP
                     updateRequest.setValue(newIp);
